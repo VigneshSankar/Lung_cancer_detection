@@ -306,7 +306,7 @@ def run(batch_size,nb_classes,nb_epoch,data_augmentation,img_rows, img_cols,img_
         # serialize model to JSON
         
 weightfilepath = "/work/vsankar/Project-Luna/Luna_weights/luna_weights_t_ae5_nt_b128_d25_BN1_d2_4_rotated.hdf5"
-logfilepath = '/work/vsankar/Project-Luna/Codes/t_ae5_nt_b128_d25_BN1_d2_4_rotated.log'
+logfilepath = '/work/vsankar/Project-Luna/Codes/output_log/t_ae5_nt_b128_d25_BN1_d2_4_rotated.log'
 bestweightfilepath = "/work/vsankar/Project-Luna/Luna_weights/luna_weights_t_ae5_nt_b128_d25_BN1_d2_4_rotated_best.hdf5"
 
 load_model = True
