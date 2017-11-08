@@ -181,30 +181,30 @@ def model_architecture(img_rows,img_cols,img_channels,nb_classes):
     #function defining the architecture of defined CNN
     model = Sequential()
     model.add(Convolution2D(32, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True, input_shape=(img_channels,img_rows, img_cols)))
-    #model.add(BN(axis=1, momentum=0.99, epsilon=0.001))
+    model.add(BN(axis=1, momentum=0.99, epsilon=0.001))
     Dropout((0.25))
     model.add(Convolution2D(32, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
-    #model.add(BN(axis=1, momentum=0.99, epsilon=0.00001))
+    model.add(BN(axis=1, momentum=0.99, epsilon=0.00001))
     Dropout((0.25))
     model.add(Convolution2D(32, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
 
     model.add(MaxPooling2D(pool_size=(2, 2), strides = (2,2)))
 
     model.add(Convolution2D(64, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
-    #model.add(BN(axis=1, momentum=0.99, epsilon=0.001))
+    model.add(BN(axis=1, momentum=0.99, epsilon=0.001))
     Dropout((0.25))
     model.add(Convolution2D(64, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
-    #model.add(BN(axis=1, momentum=0.99, epsilon=0.001))
+    model.add(BN(axis=1, momentum=0.99, epsilon=0.001))
     Dropout((0.25))
     model.add(Convolution2D(64, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
 
     model.add(MaxPooling2D(pool_size=(2, 2), strides = (2,2)))
 
     model.add(Convolution2D(96, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
-   # model.add(BN(axis=1, momentum=0.99, epsilon=0.001))
+    model.add(BN(axis=1, momentum=0.99, epsilon=0.001))
     Dropout((0.25))
     model.add(Convolution2D(96, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
-    #model.add(BN(axis=1, momentum=0.99, epsilon=0.001))
+    model.add(BN(axis=1, momentum=0.99, epsilon=0.001))
     Dropout((0.25))
     model.add(Convolution2D(96, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
 
@@ -215,9 +215,6 @@ def model_architecture(img_rows,img_cols,img_channels,nb_classes):
     Dropout((0.5))
     model.add(Convolution2D(2, 1, 1, activation='relu', border_mode='same',init='orthogonal', bias = True))
     model.add(GlobalAveragePooling2D(dim_ordering='default'))
-
-    #model.add(Convolution2D(10,1,1, border_mode='same',init='orthogonal', bias = True))
-    #model.add(Dense(nb_classes))
 
     model.add(Activation('softmax'))
     model.summary()
@@ -307,9 +304,9 @@ def run(batch_size,nb_classes,nb_epoch,data_augmentation,img_rows, img_cols,img_
               callbacks=[save_model_per_epoch])
         # serialize model to JSON
         
-weightfilepath = "/work/vsankar/Project-Luna/Luna_weights/luna_weights_t_ae5_nt_b128_d25_BN0.hdf5"
-logfilepath = '/work/vsankar/Project-Luna/Codes/t_ae5_nt_b128_d25_BN0.log'
-bestweightfilepath = "/work/vsankar/Project-Luna/Luna_weights/luna_weights_t_ae5_nt_b128_d25_BN0_best.hdf5"
+weightfilepath = "/work/vsankar/Project-Luna/Luna_weights/luna_weights_t_ae5_nt_b128_d25_BN1_d2_4_rotated.hdf5"
+logfilepath = '/work/vsankar/Project-Luna/Codes/t_ae5_nt_b128_d25_BN1_d2_4_rotated.log'
+bestweightfilepath = "/work/vsankar/Project-Luna/Luna_weights/luna_weights_t_ae5_nt_b128_d25_BN1_d2_4_rotated_best.hdf5"
 
 load_model = True
 batch_size = 128

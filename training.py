@@ -47,40 +47,17 @@ from scipy import io
 from IPython.core.debugger import Tracer
 import matplotlib.pyplot as plt
 
-
-def load_data():
-    X = np.load('/work/vsankar/Project-Luna/image_array.npy')
-    Y = np.load('/work/vsankar/Project-Luna/new_labels.npy')
-    for i,y in enumerate(Y):
-        if y > 4.0:
-            Y[i] = 4.0
-
-    for i,y in enumerate(Y):
-        if y<=2.0:
-            Y[i] = 0.0
-        else:
-            Y[i] = 1.0
-
-    X_train = X[:2510]
-    X_test = X[2510:]
-    y_train = Y[:2510]
-    y_test = Y[2510:]
-
-    return X_train,y_train,X_test,y_test
-
-
-
 class ModelCheckpoint1(Callback):
 
-    def __init__(self, filepath, logfilepath,bestweightfilepath , monitor='val_loss', verbose=0,
+    def __init__(self, filepath, logfilepath,bestweightfilepath, monitor='val_loss', verbose=0,
                  save_best_only=False, save_weights_only=False,
                  mode='auto', period=1):
 #         super(ModelCheckpoint1, self).__init__()
         self.monitor = monitor
         self.verbose = verbose
         self.filepath = filepath
-	self.bestfilepath = bestweightfilepath 
         self.save_best_only = save_best_only
+        self.bestfilepath = bestweightfilepath
         self.save_weights_only = save_weights_only
         self.period = period
         self.epochs_since_last_save = 0
@@ -172,52 +149,63 @@ class ModelCheckpoint1(Callback):
             self.epochs_since_last_save = 0
             filepath = self.filepath.format(epoch=epoch, **logs)
             bestfilepath = self.bestfilepath.format(epoch=epoch, **logs)
-
             current = logs.get(self.monitor)
             if current is None:
-                    warnings.warn('Can save best model only with %s available, '
-                                  'skipping.' % (self.monitor), RuntimeWarning)
+                warnings.warn('Can save best model only with %s available, '
+                              'skipping.' % (self.monitor), RuntimeWarning)
             else:
-                    if self.monitor_op(current, self.best):
-                        if self.verbose > 0:
-                            print('Epoch %05d: %s improved from %0.5f to %0.5f,'
-                                  ' saving model to %s'
-                                  % (epoch, self.monitor, self.best,
-                                     current, filepath))
-                        self.best = current
-                        if self.save_weights_only:
-                            self.model.save_weights(bestfilepath , overwrite=True)
-                        else:
-                            self.model.save(bestfilepath , overwrite=True)
+                if self.monitor_op(current, self.best):
+                    if self.verbose > 0:
+                        print('Epoch %05d: %s improved from %0.5f to %0.5f,'
+                              ' saving model to %s'
+                              % (epoch, self.monitor, self.best,
+                                 current, bestfilepath))
+                    self.best = current
+                    if self.save_weights_only:
+                        self.model.save_weights(bestfilepath, overwrite=True)
                     else:
-                        if self.verbose > 0:
-                            print('Epoch %05d: %s did not improve' %
-                                  (epoch, self.monitor))
-            
+                        self.model.save(bestfilepath, overwrite=True)
+                else:
+                    if self.verbose > 0:
+                        print('Epoch %05d: %s did not improve' %
+                              (epoch, self.monitor))
+
             if self.verbose > 0:
-                    print('Epoch %05d: saving model to %s' % (epoch, filepath))
+                print('Epoch %05d: saving model to %s' % (epoch, filepath))
             if self.save_weights_only:
-                    self.model.save_weights(filepath, overwrite=True)
+                self.model.save_weights(filepath, overwrite=True)
             else:
-                    self.model.save(filepath, overwrite=True)
+                self.model.save(filepath, overwrite=True)
                     
 def model_architecture(img_rows,img_cols,img_channels,nb_classes):
     #function defining the architecture of defined CNN
     model = Sequential()
     model.add(Convolution2D(32, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True, input_shape=(img_channels,img_rows, img_cols)))
+    model.add(BN(axis=1, momentum=0.99, epsilon=0.001))
+    Dropout((0.25))
     model.add(Convolution2D(32, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
+    model.add(BN(axis=1, momentum=0.99, epsilon=0.00001))
+    Dropout((0.25))
     model.add(Convolution2D(32, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
 
     model.add(MaxPooling2D(pool_size=(2, 2), strides = (2,2)))
 
     model.add(Convolution2D(64, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
+    model.add(BN(axis=1, momentum=0.99, epsilon=0.001))
+    Dropout((0.25))
     model.add(Convolution2D(64, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
+    model.add(BN(axis=1, momentum=0.99, epsilon=0.001))
+    Dropout((0.25))
     model.add(Convolution2D(64, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
 
     model.add(MaxPooling2D(pool_size=(2, 2), strides = (2,2)))
 
     model.add(Convolution2D(96, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
+    model.add(BN(axis=1, momentum=0.99, epsilon=0.001))
+    Dropout((0.25))
     model.add(Convolution2D(96, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
+    model.add(BN(axis=1, momentum=0.99, epsilon=0.001))
+    Dropout((0.25))
     model.add(Convolution2D(96, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
 
     model.add(MaxPooling2D(pool_size=(2, 2), strides = (2,2)))
@@ -228,26 +216,44 @@ def model_architecture(img_rows,img_cols,img_channels,nb_classes):
     model.add(Convolution2D(2, 1, 1, activation='relu', border_mode='same',init='orthogonal', bias = True))
     model.add(GlobalAveragePooling2D(dim_ordering='default'))
 
-    #model.add(Convolution2D(10,1,1, border_mode='same',init='orthogonal', bias = True))
-    #model.add(Dense(nb_classes))
-
     model.add(Activation('softmax'))
     model.summary()
     return model
 
-def normalize_date(X_train,Y_train,X_test,Y_test,nb_classes):
+
+def load_data():
+    data = np.load('/work/vsankar/Project-Luna/Train_nf_data.npz')
+    X_train = data['X_train']
+    Y_train = data['Y_train']
+    
+    data = np.load('/work/vsankar/Project-Luna/Test_nf_data.npz')
+    X_test = data['X_test']
+    Y_test = data['Y_test']    
+    
+    data = np.load('/work/vsankar/Project-Luna/Val_nf_data.npz')
+    X_val = data['X_val']
+    Y_val = data['Y_val']
+    
+    return X_train,Y_train,X_test,Y_test,X_val,Y_val
+
+def normalize_date(X_train,Y_train,X_test,Y_test,X_val, Y_val,nb_classes):
     print('X_train shape:', X_train.shape)
     print(X_train.shape[0], 'train samples')
     print(X_test.shape[0], 'test samples')
-
+    print(X_val.shape[0], 'val samples')
+    
     X_train = X_train.astype('float32')
     X_test = X_test.astype('float32')
+    X_val = X_val.astype('float32')
+    
     Y_train = Y_train.astype('float32')
     Y_test = Y_test.astype('float32')
+    Y_val = Y_val.astype('float32')
 
-    #normalizing the data
+#     normalizing the data
     X_train /= 4095.0   
     X_test /= 4095.0
+    X_val /= 4095.0
     
     #std
 #     X_train = X_train/np.std(X_train) - np.mean(X_train)
@@ -255,28 +261,23 @@ def normalize_date(X_train,Y_train,X_test,Y_test,nb_classes):
     
 #     Tracer()()
     # convert class vectors to binary class matrices
-    Y_train = np_utils.to_categorical(Y_train, nb_classes)
-    Y_test = np_utils.to_categorical(Y_test, nb_classes)
+#     Y_train = np_utils.to_categorical(Y_train, nb_classes)
+#     Y_test = np_utils.to_categorical(Y_test, nb_classes)
+#     Y_val = np_utils.to_categorical(Y_val, nb_classes)
     
-    return X_train,Y_train,X_test,Y_test
+    
+    return X_train,Y_train,X_test,Y_test,X_val,Y_val
 
-def run(batch_size,nb_classes,nb_epoch,data_augmentation,img_rows, img_cols,img_channels,weightfilepath,logfilepath,bestweightfilepath ,Load_prevmodel   ):
+
+
+
+
+def run(batch_size,nb_classes,nb_epoch,data_augmentation,img_rows, img_cols,img_channels,weightfilepath,logfilepath,bestweightfilepath,Load_model   ):
     #function to run the actual test
     # the data, shuffled and split between train and test sets
-    X_test,y_test,X_train,y_train = load_data()
-    print (X_train.shape)
-    
-#     X_train = X_train.reshape(X_train.shape[0],img_rows,img_cols,1) #reshapping it according to the keras rule
-#     X_test = X_test.reshape(X_test.shape[0],img_rows,img_cols,1)
-    
-    X_train,Y_train,X_test,Y_test = normalize_date(X_train,y_train,X_test,y_test,nb_classes)
-#     Tracer()()
+    X_train,y_train,X_test,y_test,X_val,y_val = load_data()
+    X_train,Y_train,X_test,Y_test,X_val,Y_val = normalize_date(X_train,y_train,X_test,y_test,X_val,y_val,nb_classes)
 
-
-    X_small = X_train[1:100,:,:,:]
-    Y_small = Y_train[1:100,:]
-    
-#     Tracer()()
     
     print('Loading and formatiing of data complete...')
     
@@ -286,70 +287,29 @@ def run(batch_size,nb_classes,nb_epoch,data_augmentation,img_rows, img_cols,img_
     # training the model using SGD + momentum
     adm = Adam(lr=0.00001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
     model.compile(loss='categorical_crossentropy',
-                  optimizer=adm,
-                  metrics=['accuracy'])
+                  optimizer=adm,metrics=['accuracy'])
 
   
-    if Load_prevmodel:
-    	model.load_weights(weightfilepath )
+    if Load_model:
+        model.load_weights(weightfilepath )
 
-    save_model_per_epoch = ModelCheckpoint1(weightfilepath,logfilepath,bestweightfilepath,  monitor='val_loss', verbose=1)
-#     Tracer()()
-    if not data_augmentation:
-        print('Not using data augmentation.')
+    save_model_per_epoch = ModelCheckpoint1(weightfilepath,logfilepath,bestweightfilepath, monitor='val_loss', verbose=1, save_best_only=False)
 
-        model.fit(X_train,Y_train,
-                  batch_size=batch_size,
-                  nb_epoch=nb_epoch,
-                  validation_data=(X_test, Y_test),
-                  shuffle=True,
-                  verbose=1,
-                  callbacks=[save_model_per_epoch])
-    else:
-        print('Using real-time data augmentation.')
-
-        # this will do preprocessing and realtime data augmentation
-        datagen = ImageDataGenerator(
-            featurewise_center=False,  # set input mean to 0 over the dataset
-            samplewise_center=False,  # set each sample mean to 0
-            featurewise_std_normalization=False,  # divide inputs by std of the dataset
-            samplewise_std_normalization=False,  # divide each input by its std
-            zca_whitening=False,  # apply ZCA whitening
-            rotation_range=0,  # randomly rotate images in the range (degrees, 0 to 180)
-            #shear_range = 0.34,  # value in radians, equivalent to 20 deg
-            #zoom_range = [1/1.6, 1.6],   #same as in NIPS 2015 paper.
-            #width_shift_range=0.1,  # randomly shift images horizontally (fraction of total width)
-            #height_shift_range=0.1,  # randomly shift images vertically (fraction of total height)
-            horizontal_flip=False,  # randomly flip images
-            vertical_flip=False)  # randomly flip images
-
-        # compute quantities required for featurewise normalization
-        # (std, mean, and principal components if ZCA whitening is applied)
-        #datagen.fit(X_train) #Not required as it is Only required if featurewise_center or featurewise_std_normalization or zca_whitening.
-
-        # fit the model on the batches generated by datagen.flow() and save the loss and acc data history in the hist variable
-        
-#         filepath = "/work/vsankar/Project-Luna/luna_weights_1.hdf5"
-#         save_model_per_epoch = ModelCheckpoint(filepath, monitor='val_loss', verbose=1, save_best_only=True, mode='auto')
-
-        hist = model.fit_generator(datagen.flow(X_train, Y_train,
-                            batch_size=batch_size),
-                            samples_per_epoch=X_train.shape[0],
-                            nb_epoch=nb_epoch,
-                            verbose=1,
-                            validation_data=(X_test, Y_test),
-                            callbacks=[save_model_per_epoch])
-
-        
-
+    model.fit(X_train,Y_train,
+              batch_size=batch_size,
+              nb_epoch=nb_epoch,
+              validation_data=(X_test, Y_test),
+              shuffle=True,
+              verbose=1,
+              callbacks=[save_model_per_epoch])
         # serialize model to JSON
         
-weightfilepath = "/work/vsankar/Project-Luna/Luna_weights/luna_weights_t_ae6_nt_b50_BN0.hdf5"
-logfilepath = '/work/vsankar/Project-Luna/Codes/t_ae6_nt_b50_BN0.log'
-bestweightfilepath = "/work/vsankar/Project-Luna/Luna_weights/luna_weights_t_ae6_nt_b50_BN0_best3.hdf5"
+weightfilepath = "/work/vsankar/Project-Luna/Luna_weights/luna_weights_t_ae5_nt_b128_d25_BN1_d2_4_rotated.hdf5"
+logfilepath = '/work/vsankar/Project-Luna/Codes/t_ae5_nt_b128_d25_BN1_d2_4_rotated.log'
+bestweightfilepath = "/work/vsankar/Project-Luna/Luna_weights/luna_weights_t_ae5_nt_b128_d25_BN1_d2_4_rotated_best.hdf5"
 
-Load_prevmodel = True
-batch_size = 50
+load_model = True
+batch_size = 128
 nb_classes = 2
 nb_epoch = 30
 data_augmentation = True
@@ -358,5 +318,5 @@ data_augmentation = True
 img_rows, img_cols = 96,96
 # the imgCLEF images are grey
 img_channels = 1
-run(batch_size,nb_classes,nb_epoch,data_augmentation,img_rows,img_cols,img_channels,weightfilepath,logfilepath,bestweightfilepath ,Load_prevmodel )
+run(batch_size,nb_classes,nb_epoch,data_augmentation,img_rows,img_cols,img_channels,weightfilepath,logfilepath,bestweightfilepath,load_model )
 # model_architecture(img_rows,img_cols,img_channels,nb_classes)
