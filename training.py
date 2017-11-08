@@ -47,6 +47,7 @@ from scipy import io
 from IPython.core.debugger import Tracer
 import matplotlib.pyplot as plt
 
+
 class ModelCheckpoint1(Callback):
 
     def __init__(self, filepath, logfilepath,bestweightfilepath, monitor='val_loss', verbose=0,
