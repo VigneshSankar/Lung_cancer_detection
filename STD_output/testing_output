@@ -1,0 +1,54 @@
+  File "/work/vsankar/Project-Luna/Codes/testing.py", line 191
+    print model.evaluate(X_test, Y_test, batch_size=1, verbose=0)
+              ^
+SyntaxError: invalid syntax
+  File "/work/vsankar/Project-Luna/Codes/testing.py", line 191
+    print model.evaluate(X_test, Y_test, batch_size=1, verbose=0)
+              ^
+SyntaxError: invalid syntax
+Using TensorFlow backend.
+2017-10-10 16:36:56.620151: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use SSE4.1 instructions, but these are available on your machine and could speed up CPU computations.
+2017-10-10 16:36:56.620209: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use SSE4.2 instructions, but these are available on your machine and could speed up CPU computations.
+2017-10-10 16:36:56.620226: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use AVX instructions, but these are available on your machine and could speed up CPU computations.
+2017-10-10 16:36:56.620239: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use AVX2 instructions, but these are available on your machine and could speed up CPU computations.
+2017-10-10 16:36:56.620251: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use FMA instructions, but these are available on your machine and could speed up CPU computations.
+2017-10-10 16:36:56.785360: I tensorflow/core/common_runtime/gpu/gpu_device.cc:887] Found device 0 with properties: 
+name: Tesla K80
+major: 3 minor: 7 memoryClockRate (GHz) 0.8235
+pciBusID 0000:0a:00.0
+Total memory: 11.25GiB
+Free memory: 11.13GiB
+2017-10-10 16:36:56.785486: W tensorflow/stream_executor/cuda/cuda_driver.cc:485] creating context when one is currently active; existing: 0x4dede60
+2017-10-10 16:36:56.931924: I tensorflow/core/common_runtime/gpu/gpu_device.cc:887] Found device 1 with properties: 
+name: Tesla K80
+major: 3 minor: 7 memoryClockRate (GHz) 0.8235
+pciBusID 0000:84:00.0
+Total memory: 11.25GiB
+Free memory: 11.13GiB
+2017-10-10 16:36:56.932020: I tensorflow/core/common_runtime/gpu/gpu_device.cc:779] Peer access not supported between device ordinals 0 and 1
+2017-10-10 16:36:56.932048: I tensorflow/core/common_runtime/gpu/gpu_device.cc:779] Peer access not supported between device ordinals 1 and 0
+2017-10-10 16:36:56.932076: I tensorflow/core/common_runtime/gpu/gpu_device.cc:908] DMA: 0 1 
+2017-10-10 16:36:56.932094: I tensorflow/core/common_runtime/gpu/gpu_device.cc:918] 0:   Y N 
+2017-10-10 16:36:56.932106: I tensorflow/core/common_runtime/gpu/gpu_device.cc:918] 1:   N Y 
+2017-10-10 16:36:56.932127: I tensorflow/core/common_runtime/gpu/gpu_device.cc:977] Creating TensorFlow device (/gpu:0) -> (device: 0, name: Tesla K80, pci bus id: 0000:0a:00.0)
+2017-10-10 16:36:56.932142: I tensorflow/core/common_runtime/gpu/gpu_device.cc:977] Creating TensorFlow device (/gpu:1) -> (device: 1, name: Tesla K80, pci bus id: 0000:84:00.0)
+(34847, 1, 96, 96)
+X_train shape: (34847, 1, 96, 96)
+34847 train samples
+2510 test samples
+Loading and formatiing of data complete...
+X_train shape: (34847, 1, 96, 96)
+34847 train samples
+2510 test samples
+performance of 2
+[0.36949104646371789, 0.86693227091633462]
+(34847, 1, 96, 96)
+X_train shape: (34847, 1, 96, 96)
+34847 train samples
+2510 test samples
+Loading and formatiing of data complete...
+X_train shape: (34847, 1, 96, 96)
+34847 train samples
+2510 test samples
+performance of 3
+[0.41418081547830121, 0.84063745019920322]
