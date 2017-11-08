@@ -20,7 +20,7 @@ from collections import Iterable
 # os.environ["THEANO_FLAGS"] = "device=gpu0,floatX=float32" 
 
 os.environ['KERAS_BACKEND'] = 'tensorflow'
-# os.environ[
+#os.environ[
 #     "THEANO_FLAGS"] = "mode=FAST_RUN,device=gpu,floatX=float32,force_device=true"#,lib.cnmem=0.7 ,nvcc.flags=-D_FORCE_INLINES"
 import sys
 import numpy as np
@@ -72,13 +72,14 @@ def load_data():
 
 class ModelCheckpoint1(Callback):
 
-    def __init__(self, filepath, logfilepath, monitor='val_loss', verbose=0,
+    def __init__(self, filepath, logfilepath,bestweightfilepath , monitor='val_loss', verbose=0,
                  save_best_only=False, save_weights_only=False,
                  mode='auto', period=1):
 #         super(ModelCheckpoint1, self).__init__()
         self.monitor = monitor
         self.verbose = verbose
         self.filepath = filepath
+	self.bestfilepath = bestweightfilepath 
         self.save_best_only = save_best_only
         self.save_weights_only = save_weights_only
         self.period = period
@@ -170,12 +171,13 @@ class ModelCheckpoint1(Callback):
         if self.epochs_since_last_save >= self.period:
             self.epochs_since_last_save = 0
             filepath = self.filepath.format(epoch=epoch, **logs)
-            if self.save_best_only:
-                current = logs.get(self.monitor)
-                if current is None:
+            bestfilepath = self.bestfilepath.format(epoch=epoch, **logs)
+
+            current = logs.get(self.monitor)
+            if current is None:
                     warnings.warn('Can save best model only with %s available, '
                                   'skipping.' % (self.monitor), RuntimeWarning)
-                else:
+            else:
                     if self.monitor_op(current, self.best):
                         if self.verbose > 0:
                             print('Epoch %05d: %s improved from %0.5f to %0.5f,'
@@ -184,44 +186,38 @@ class ModelCheckpoint1(Callback):
                                      current, filepath))
                         self.best = current
                         if self.save_weights_only:
-                            self.model.save_weights(filepath, overwrite=True)
+                            self.model.save_weights(bestfilepath , overwrite=True)
                         else:
-                            self.model.save(filepath, overwrite=True)
+                            self.model.save(bestfilepath , overwrite=True)
                     else:
                         if self.verbose > 0:
                             print('Epoch %05d: %s did not improve' %
                                   (epoch, self.monitor))
-            else:
-                if self.verbose > 0:
+            
+            if self.verbose > 0:
                     print('Epoch %05d: saving model to %s' % (epoch, filepath))
-                if self.save_weights_only:
+            if self.save_weights_only:
                     self.model.save_weights(filepath, overwrite=True)
-                else:
+            else:
                     self.model.save(filepath, overwrite=True)
                     
 def model_architecture(img_rows,img_cols,img_channels,nb_classes):
     #function defining the architecture of defined CNN
     model = Sequential()
     model.add(Convolution2D(32, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True, input_shape=(img_channels,img_rows, img_cols)))
-    model.add(BN(axis=1, momentum=0.99, epsilon=0.00001))
     model.add(Convolution2D(32, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
-    model.add(BN(axis=1, momentum=0.99, epsilon=0.00001))
     model.add(Convolution2D(32, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
 
     model.add(MaxPooling2D(pool_size=(2, 2), strides = (2,2)))
 
     model.add(Convolution2D(64, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
-    model.add(BN(axis=1, momentum=0.99, epsilon=0.00001))
     model.add(Convolution2D(64, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
-    model.add(BN(axis=1, momentum=0.99, epsilon=0.00001))
     model.add(Convolution2D(64, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
 
     model.add(MaxPooling2D(pool_size=(2, 2), strides = (2,2)))
 
     model.add(Convolution2D(96, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
-    model.add(BN(axis=1, momentum=0.99, epsilon=0.00001))
     model.add(Convolution2D(96, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
-    model.add(BN(axis=1, momentum=0.99, epsilon=0.00001))
     model.add(Convolution2D(96, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
 
     model.add(MaxPooling2D(pool_size=(2, 2), strides = (2,2)))
@@ -264,7 +260,7 @@ def normalize_date(X_train,Y_train,X_test,Y_test,nb_classes):
     
     return X_train,Y_train,X_test,Y_test
 
-def run(batch_size,nb_classes,nb_epoch,data_augmentation,img_rows, img_cols,img_channels,weightfilepath,logfilepath   ):
+def run(batch_size,nb_classes,nb_epoch,data_augmentation,img_rows, img_cols,img_channels,weightfilepath,logfilepath,bestweightfilepath ,Load_prevmodel   ):
     #function to run the actual test
     # the data, shuffled and split between train and test sets
     X_test,y_test,X_train,y_train = load_data()
@@ -288,21 +284,21 @@ def run(batch_size,nb_classes,nb_epoch,data_augmentation,img_rows, img_cols,img_
     model = model_architecture(img_rows,img_cols,img_channels,nb_classes)
 
     # training the model using SGD + momentum
-    adm = Adam(lr=0.000001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+    adm = Adam(lr=0.00001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
     model.compile(loss='categorical_crossentropy',
                   optimizer=adm,
                   metrics=['accuracy'])
 
   
+    if Load_prevmodel:
+    	model.load_weights(weightfilepath )
 
-    model.load_weights(weightfilepath )
-
-    save_model_per_epoch = ModelCheckpoint1(weightfilepath,logfilepath, monitor='val_loss', verbose=1, save_best_only=False)
+    save_model_per_epoch = ModelCheckpoint1(weightfilepath,logfilepath,bestweightfilepath,  monitor='val_loss', verbose=1)
 #     Tracer()()
     if not data_augmentation:
         print('Not using data augmentation.')
 
-        model.fit(X_test,Y_test,
+        model.fit(X_train,Y_train,
                   batch_size=batch_size,
                   nb_epoch=nb_epoch,
                   validation_data=(X_test, Y_test),
@@ -348,16 +344,19 @@ def run(batch_size,nb_classes,nb_epoch,data_augmentation,img_rows, img_cols,img_
 
         # serialize model to JSON
         
-weightfilepath = "/work/vsankar/Project-Luna/Luna_weights/luna_weights_t_ae6_nt1_b64.hdf5"
-logfilepath = '/work/vsankar/Project-Luna/Codes/t_ae6_nt1_b64.log'
+weightfilepath = "/work/vsankar/Project-Luna/Luna_weights/luna_weights_t_ae6_nt_b50_BN0.hdf5"
+logfilepath = '/work/vsankar/Project-Luna/Codes/t_ae6_nt_b50_BN0.log'
+bestweightfilepath = "/work/vsankar/Project-Luna/Luna_weights/luna_weights_t_ae6_nt_b50_BN0_best3.hdf5"
 
-batch_size = 64
+Load_prevmodel = True
+batch_size = 50
 nb_classes = 2
 nb_epoch = 30
 data_augmentation = True
+
 # input image dimensions
 img_rows, img_cols = 96,96
 # the imgCLEF images are grey
 img_channels = 1
-run(batch_size,nb_classes,nb_epoch,data_augmentation,img_rows,img_cols,img_channels,weightfilepath,logfilepath  )
+run(batch_size,nb_classes,nb_epoch,data_augmentation,img_rows,img_cols,img_channels,weightfilepath,logfilepath,bestweightfilepath ,Load_prevmodel )
 # model_architecture(img_rows,img_cols,img_channels,nb_classes)
