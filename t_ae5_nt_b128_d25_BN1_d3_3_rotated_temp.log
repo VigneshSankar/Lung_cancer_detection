@@ -1,0 +1,2 @@
+epoch,get_categorical_accuracy_keras,loss,val_get_categorical_accuracy_keras,val_loss
+0,0.54909437564315589,0.69259817555930303,0.52113123611681111,0.69271756860616662

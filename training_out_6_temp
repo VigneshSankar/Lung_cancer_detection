@@ -1,0 +1,11 @@
+python: can't open file '/work/vsankar/Project-Luna/Codes/training_nf_ft_ae6_b_64.py': [Errno 2] No such file or directory
+--- SharcNET Job Epilogue ---
+              job id: 265121
+         exit status: 2
+            cpu time: 0 / 4.0h (0 %)
+        elapsed time: 2s / 4.0h (0 %)
+
+Job returned with status 2.
+WARNING: Job only used 0 % of its requested walltime.
+WARNING: Job only used 0 % of its requested cpu time.
+WARNING: Job only used 0 % of allocated cpu time.

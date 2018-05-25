@@ -46,7 +46,13 @@ from keras.datasets import mnist
 from scipy import io
 from IPython.core.debugger import Tracer
 import matplotlib.pyplot as plt
+from keras import metrics
+import numpy as np
 
+import keras.backend as K
+
+def get_categorical_accuracy_keras(y_true, y_pred):
+    return K.mean(K.equal(K.argmax(y_true, axis=1), K.argmax(y_pred, axis=1)))
 
 class ModelCheckpoint1(Callback):
 
@@ -178,42 +184,59 @@ class ModelCheckpoint1(Callback):
             else:
                 self.model.save(filepath, overwrite=True)
                     
+
+
 def model_architecture(img_rows,img_cols,img_channels,nb_classes):
     #function defining the architecture of defined CNN
+    
     model = Sequential()
+
     model.add(Convolution2D(32, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True, input_shape=(img_channels,img_rows, img_cols)))
+
     model.add(BN(axis=1, momentum=0.99, epsilon=0.001))
     Dropout((0.25))
+
     model.add(Convolution2D(32, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
+
     model.add(BN(axis=1, momentum=0.99, epsilon=0.00001))
     Dropout((0.25))
+
     model.add(Convolution2D(32, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
-
     model.add(MaxPooling2D(pool_size=(2, 2), strides = (2,2)))
-
-    model.add(Convolution2D(64, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
-    model.add(BN(axis=1, momentum=0.99, epsilon=0.001))
-    Dropout((0.25))
-    model.add(Convolution2D(64, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
-    model.add(BN(axis=1, momentum=0.99, epsilon=0.001))
-    Dropout((0.25))
     model.add(Convolution2D(64, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
 
+    model.add(BN(axis=1, momentum=0.99, epsilon=0.001))
+    Dropout((0.25))
+
+    model.add(Convolution2D(64, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
+
+    model.add(BN(axis=1, momentum=0.99, epsilon=0.001))
+    Dropout((0.25))
+
+    model.add(Convolution2D(64, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
     model.add(MaxPooling2D(pool_size=(2, 2), strides = (2,2)))
-
-    model.add(Convolution2D(96, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
-    model.add(BN(axis=1, momentum=0.99, epsilon=0.001))
-    Dropout((0.25))
-    model.add(Convolution2D(96, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
-    model.add(BN(axis=1, momentum=0.99, epsilon=0.001))
-    Dropout((0.25))
     model.add(Convolution2D(96, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
 
+    model.add(BN(axis=1, momentum=0.99, epsilon=0.001))
+    Dropout((0.25))
+
+    model.add(Convolution2D(96, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
+
+    model.add(BN(axis=1, momentum=0.99, epsilon=0.001))
+    Dropout((0.25))
+
+    model.add(Convolution2D(96, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
     model.add(MaxPooling2D(pool_size=(2, 2), strides = (2,2)))
     model.add(Convolution2D(128, 3, 3, activation='relu', border_mode='same',init='orthogonal', bias = True))
+
+    model.add(BN(axis=1, momentum=0.99, epsilon=0.001))
     Dropout((0.5))
+
     model.add(Convolution2D(512, 1, 1, activation='relu', border_mode='same',init='orthogonal', bias = True))
+
+    model.add(BN(axis=1, momentum=0.99, epsilon=0.001))
     Dropout((0.5))
+
     model.add(Convolution2D(2, 1, 1, activation='relu', border_mode='same',init='orthogonal', bias = True))
     model.add(GlobalAveragePooling2D(dim_ordering='default'))
 
@@ -223,15 +246,15 @@ def model_architecture(img_rows,img_cols,img_channels,nb_classes):
 
 
 def load_data():
-    data = np.load('/work/vsankar/Project-Luna/Train_nf_data.npz')
+    data = np.load('/work/vsankar/Project-Luna/Train_nf_3_3_rotated_data.npz')
     X_train = data['X_train']
     Y_train = data['Y_train']
     
-    data = np.load('/work/vsankar/Project-Luna/Test_nf_data.npz')
+    data = np.load('/work/vsankar/Project-Luna/Test_nf_3_3_rotated_data.npz')
     X_test = data['X_test']
     Y_test = data['Y_test']    
     
-    data = np.load('/work/vsankar/Project-Luna/Val_nf_data.npz')
+    data = np.load('/work/vsankar/Project-Luna/Val_nf_3_3_rotated_data.npz')
     X_val = data['X_val']
     Y_val = data['Y_val']
     
@@ -262,11 +285,11 @@ def normalize_date(X_train,Y_train,X_test,Y_test,X_val, Y_val,nb_classes):
     
 #     Tracer()()
     # convert class vectors to binary class matrices
-#     Y_train = np_utils.to_categorical(Y_train, nb_classes)
-#     Y_test = np_utils.to_categorical(Y_test, nb_classes)
-#     Y_val = np_utils.to_categorical(Y_val, nb_classes)
+    Y_train = np_utils.to_categorical(Y_train, nb_classes)
+    Y_test = np_utils.to_categorical(Y_test, nb_classes)
+    Y_val = np_utils.to_categorical(Y_val, nb_classes)
     
-    
+#     Tracer()()
     return X_train,Y_train,X_test,Y_test,X_val,Y_val
 
 
@@ -288,29 +311,29 @@ def run(batch_size,nb_classes,nb_epoch,data_augmentation,img_rows, img_cols,img_
     # training the model using SGD + momentum
     adm = Adam(lr=0.00001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
     model.compile(loss='categorical_crossentropy',
-                  optimizer=adm,metrics=['accuracy'])
+                  optimizer=adm,
+                  metrics=[get_categorical_accuracy_keras])
 
   
     if Load_model:
         model.load_weights(weightfilepath )
 
     save_model_per_epoch = ModelCheckpoint1(weightfilepath,logfilepath,bestweightfilepath, monitor='val_loss', verbose=1, save_best_only=False)
-
     model.fit(X_train,Y_train,
               batch_size=batch_size,
               nb_epoch=nb_epoch,
-              validation_data=(X_test, Y_test),
+              validation_data=(X_val, Y_val),
               shuffle=True,
               verbose=1,
               callbacks=[save_model_per_epoch])
         # serialize model to JSON
         
-weightfilepath = "/work/vsankar/Project-Luna/Luna_weights/luna_weights_t_ae5_nt_b128_d25_BN1_d2_4_rotated.hdf5"
-logfilepath = '/work/vsankar/Project-Luna/Codes/output_log/t_ae5_nt_b128_d25_BN1_d2_4_rotated.log'
-bestweightfilepath = "/work/vsankar/Project-Luna/Luna_weights/luna_weights_t_ae5_nt_b128_d25_BN1_d2_4_rotated_best.hdf5"
+weightfilepath = "/work/vsankar/Project-Luna/Luna_weights/luna_weights_t_ae5_nt_b128_d25_BN1_d3_3_rotated.hdf5"
+logfilepath = '/work/vsankar/Project-Luna/Codes/t_ae5_nt_b128_d25_BN1_d3_3_rotated.log'
+bestweightfilepath = "/work/vsankar/Project-Luna/Luna_weights/luna_weights_t_ae5_nt_b128_d25_BN1_d3_3_rotated_best.hdf5"
 
 load_model = True
-batch_size = 128
+batch_size = 64
 nb_classes = 2
 nb_epoch = 30
 data_augmentation = True
